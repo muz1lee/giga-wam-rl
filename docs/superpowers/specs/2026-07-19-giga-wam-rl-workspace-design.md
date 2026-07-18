@@ -22,7 +22,7 @@ The workspace must make it impossible by default for our experiments to modify t
 
 - Local canonical checkout: `01_wam_rl_research/giga-wam-rl`
 - Server working checkout: `/home/knowin-wenqian/giga-wam-rl`
-- Persistent artifacts: `/mnt/nas/knowin-wenqian/giga-wam-rl`
+- Persistent artifacts: `/mnt/nas/wenqian/giga-wam-rl`
 
 This keeps code operations fast while putting large persistent assets on NAS. It requires Git synchronization between the local and server checkouts.
 
@@ -64,7 +64,7 @@ The first executable component is a workspace validator. It parses the asset reg
 ### 4.2 Persistent artifact root
 
 ```text
-/mnt/nas/knowin-wenqian/giga-wam-rl/
+/mnt/nas/wenqian/giga-wam-rl/
 ├── artifacts/
 ├── cache/
 ├── datasets/

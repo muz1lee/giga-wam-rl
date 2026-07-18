@@ -1,0 +1,16 @@
+.DS_Store
+.env
+.venv/
+__pycache__/
+*.py[cod]
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+
+# Large or generated research artifacts must live on the dedicated NAS root.
+artifacts/
+cache/
+datasets/
+models/
+runs/
+tmp/

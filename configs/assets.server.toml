@@ -1,0 +1,73 @@
+[workspace]
+server_code_root = "/home/knowin-wenqian/giga-wam-rl"
+artifact_root = "/mnt/nas/wenqian/giga-wam-rl"
+protected_roots = [
+  "/home/wjh",
+  "/mnt/data/wjh",
+  "/mnt/data/历史备份_20260706/解压内容/01_home_wjh_完整备份/home/wjh",
+]
+
+[workspace.outputs]
+artifacts = "/mnt/nas/wenqian/giga-wam-rl/artifacts"
+cache = "/mnt/nas/wenqian/giga-wam-rl/cache"
+converted_datasets = "/mnt/nas/wenqian/giga-wam-rl/datasets/converted"
+dataset_manifests = "/mnt/nas/wenqian/giga-wam-rl/datasets/manifests"
+models = "/mnt/nas/wenqian/giga-wam-rl/models"
+runs = "/mnt/nas/wenqian/giga-wam-rl/runs"
+tmp = "/mnt/nas/wenqian/giga-wam-rl/tmp"
+
+[[assets]]
+name = "place_bread_50demo"
+kind = "dataset"
+path = "/mnt/data/wjh/lingbot_datasets/place_bread_50demo_raw_sft_241f_20260714"
+owner = "student"
+read_only = true
+compatibility = "16d_action_promising; lerobot_v2_1_and_wan_latents_unverified"
+
+[[assets]]
+name = "robotwin_eval_rollouts"
+kind = "dataset"
+path = "/mnt/data/wjh/robotwin_eval"
+owner = "student"
+read_only = true
+compatibility = "contains_success_and_failure_rollouts; alignment_unverified"
+
+[[assets]]
+name = "rollout_review_96"
+kind = "dataset"
+path = "/mnt/data/wjh/rollout_review"
+owner = "student"
+read_only = true
+compatibility = "preferred_small_audit_set"
+
+[[assets]]
+name = "robotwin_clean50x50_official"
+kind = "dataset"
+path = "/home/wjh/robotwin_clean50x50_official"
+owner = "student"
+read_only = true
+compatibility = "episode_schema_and_integrity_unverified"
+
+[[assets]]
+name = "lingbot_robotwin_checkpoint"
+kind = "model"
+path = "/home/wjh/lingbot-va/checkpoints/lingbot-va-posttrain-robotwin"
+owner = "student"
+read_only = true
+compatibility = "baseline_or_data_generation; not_a_giga_0_5_checkpoint"
+
+[[assets]]
+name = "recap_siglip2"
+kind = "model"
+path = "/mnt/data/wjh/models/recap/siglip2-so400m-patch14-224"
+owner = "student"
+read_only = true
+compatibility = "available_if_reward_or_representation_pipeline_requires_it"
+
+[[assets]]
+name = "lingbot_source"
+kind = "source"
+path = "/home/wjh/lingbot-va"
+owner = "student"
+read_only = true
+compatibility = "dirty_active_checkout; reference_or_external_service_only"

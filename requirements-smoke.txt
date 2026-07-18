@@ -1,0 +1,11 @@
+# Minimal exact environment for checkpoint validation and inference smoke tests.
+# The full training environment remains pinned by external/giga-world-policy/requirements.txt.
+
+accelerate==1.13.0
+diffusers==0.36.0
+einops==0.8.0
+huggingface-hub==0.34.3
+peft==0.17.1
+safetensors==0.5.2
+tokenizers==0.21.4
+transformers==4.54.1

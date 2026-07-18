@@ -9,6 +9,7 @@ sys.path.insert(0, str(PROJECT_ROOT / "src"))
 from giga_wam_rl.gwp05_smoke import (  # noqa: E402
     ContractError,
     expected_timestep_tokens,
+    expected_visual_output_shapes,
     validate_loading_info,
     validate_model_config,
 )
@@ -46,6 +47,12 @@ class GWP05ContractTests(unittest.TestCase):
 
     def test_realistic_joint_forward_uses_289_timesteps(self) -> None:
         self.assertEqual(expected_timestep_tokens(), 289)
+
+    def test_visual_output_contains_reference_and_future_latents(self) -> None:
+        full_shape, future_shape = expected_visual_output_shapes()
+
+        self.assertEqual(full_shape, (1, 48, 2, 24, 20))
+        self.assertEqual(future_shape, (1, 48, 1, 24, 20))
 
     def test_loading_info_must_be_strictly_empty(self) -> None:
         validate_loading_info(

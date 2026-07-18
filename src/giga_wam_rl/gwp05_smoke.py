@@ -66,6 +66,10 @@ def expected_timestep_tokens() -> int:
     )
 
 
+def expected_visual_output_shapes() -> tuple[tuple[int, ...], tuple[int, ...]]:
+    return (1, 48, 2, 24, 20), (1, 48, 1, 24, 20)
+
+
 def _load_json(path: Path) -> dict[str, Any]:
     if not path.is_file():
         raise ContractError(f"required checkpoint file is missing: {path}")
@@ -164,6 +168,8 @@ def validate_upstream_checkout(project_root: Path, upstream_root: Path) -> str:
 
 
 def _add_upstream_import_paths(upstream_root: Path) -> None:
+    # The pinned upstream checkout is a provenance input, not a writable runtime.
+    sys.dont_write_bytecode = True
     paths = (
         upstream_root,
         upstream_root / "third_party" / "giga-models",
@@ -249,12 +255,18 @@ def strict_load_and_forward(
 
     visual_pred = output["sample"]
     action_pred = output["action_pred"]
-    expected_visual_shape = (1, 48, 1, 24, 20)
+    expected_visual_shape, expected_future_shape = expected_visual_output_shapes()
     expected_action_shape = (1, 48, 16)
     if tuple(visual_pred.shape) != expected_visual_shape:
         raise ContractError(
             f"visual output must have shape {expected_visual_shape}, "
             f"got {tuple(visual_pred.shape)}"
+        )
+    future_pred = visual_pred[:, :, 1:]
+    if tuple(future_pred.shape) != expected_future_shape:
+        raise ContractError(
+            f"future output must have shape {expected_future_shape}, "
+            f"got {tuple(future_pred.shape)}"
         )
     if tuple(action_pred.shape) != expected_action_shape:
         raise ContractError(
@@ -271,6 +283,7 @@ def strict_load_and_forward(
         "dtype": "bfloat16",
         "negative_32d_error": negative_32d_error,
         "visual_shape": list(visual_pred.shape),
+        "future_shape": list(future_pred.shape),
         "action_shape": list(action_pred.shape),
         "peak_gpu_memory_gib": round(
             torch.cuda.max_memory_reserved(device) / (1024**3), 3

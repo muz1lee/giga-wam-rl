@@ -1,0 +1,15 @@
+[code.giga_world_policy_0_5]
+repository = "https://github.com/open-gigaai/giga-world-policy.git"
+revision = "5d55073a6508de7354c83679d9028f4010ff6cb2"
+local_checkout = "external/giga-world-policy"
+server_checkout = "/home/knowin-wenqian/giga-wam-rl/external/giga-world-policy"
+
+[models.giga_world_policy_0_5_transformer]
+repository = "https://huggingface.co/open-gigaai/Giga-World-Policy-0.5"
+revision = "4b68e90c0833fec96df456426be344bab64e01a3"
+target = "/mnt/nas/wenqian/giga-wam-rl/models/Giga-World-Policy-0.5"
+
+[models.wan_2_2_ti2v_5b_diffusers]
+repository = "https://huggingface.co/Wan-AI/Wan2.2-TI2V-5B-Diffusers"
+revision = "b8fff7315c768468a5333511427288870b2e9635"
+target = "/mnt/nas/wenqian/giga-wam-rl/models/Wan2.2-TI2V-5B-Diffusers"

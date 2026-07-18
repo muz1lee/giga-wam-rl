@@ -8,7 +8,7 @@
 
 | 类型 | 路径 | 状态 |
 |---|---|---|
-| 本地 Git 仓库 | `01_wam_rl_research/giga-wam-rl` | `main`，bootstrap commit `1db7141` |
+| 本地 Git 仓库 | `01_wam_rl_research/giga-wam-rl` | `main`；精确版本用 `git rev-parse HEAD` 查询 |
 | 服务器代码 | `/home/knowin-wenqian/giga-wam-rl` | 已同步，Git 状态干净 |
 | 持久化产物 | `/mnt/nas/wenqian/giga-wam-rl` | 已创建 |
 
@@ -64,19 +64,31 @@ export WANDB_DIR="$GIGA_WAM_RL_ARTIFACT_ROOT/runs/wandb"
 | RobotWin eval rollouts | `/mnt/data/wjh/robotwin_eval` | 同时有成功与失败；对齐关系待验证 |
 | 96-transition review | `/mnt/data/wjh/rollout_review` | 第一阶段 adapter/sanity check 首选 |
 | RoboTwin 50×50 | `/home/wjh/robotwin_clean50x50_official` | 最终 episode schema 和完整性待核验 |
+| Place-bread raw HDF5 | `/home/wjh/robotwin_clean50x50_official/workspace/RoboTwin/data/place_bread_basket/demo_clean_fastwam/data` | 首选 demo 转换源；已观察到多相机 RGB 与 14D `joint_action/vector` |
 | LingBot RobotWin checkpoint | `/home/wjh/lingbot-va/checkpoints/lingbot-va-posttrain-robotwin` | baseline/数据生成；不是 Giga 0.5 权重 |
 | RECAP SigLIP2 | `/mnt/data/wjh/models/recap/siglip2-so400m-patch14-224` | reward/representation 需要时复用 |
 | LingBot source | `/home/wjh/lingbot-va` | dirty 且正在服务；只读参考或外部服务 |
 
-服务器检查器确认上述 7 个路径当前均存在。完整登记见 `configs/assets.server.toml`。
+服务器检查器确认上述 8 个路径当前均存在。完整登记见 `configs/assets.server.toml`。
 
 ## 当前缺失、需要后续补齐
 
-- GigaWorld-Policy-0.5 代码与 checkpoint；
+- GigaWorld-Policy-0.5 transformer checkpoint 和 Wan2.2 base 权重；
 - 当前服务器上的 FastWAM-RL checkout；
 - 可确认与 Giga 0.5 完全匹配的 VAE/latent；
 - 针对 96 transitions 的 schema、action frame、camera order、chunk length 验证结果；
 - Git 远端。当前本地和服务器 checkout 都有完整 commit 历史，但尚未配置持久化远端。
+
+## GigaWorld-Policy-0.5 后续审计更新
+
+官方代码已 clone 到以下只读参考位置，并固定在 commit `5d55073a6508de7354c83679d9028f4010ff6cb2`：
+
+```text
+本地：   01_wam_rl_research/giga-wam-rl/external/giga-world-policy
+服务器： /home/knowin-wenqian/giga-wam-rl/external/giga-world-policy
+```
+
+两个 checkout 均为 detached HEAD，Git 状态干净；`external/` 不进入我们的仓库。模型 revision 也已固定在 `configs/upstreams.toml`，但尚未下载任何权重。接口审计见 `docs/gwp05-interface-audit-2026-07-19.md`。
 
 ## 学生目录未受影响的证据
 

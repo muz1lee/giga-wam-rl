@@ -13,6 +13,8 @@ student assets:     /home/wjh and /mnt/data/wjh (read-only)
 
 The server asset registry is [`configs/assets.server.toml`](configs/assets.server.toml). An entry means the asset was located; it does not mean that its latent format, camera order, coordinate frame, or action chunks are already compatible with GigaWorld-Policy-0.5.
 
+Pinned upstream source/model revisions are recorded in [`configs/upstreams.toml`](configs/upstreams.toml). The upstream source is checked out under the ignored `external/` directory and is never edited in place. The code/interface audit is in [`docs/gwp05-interface-audit-2026-07-19.md`](docs/gwp05-interface-audit-2026-07-19.md).
+
 ## Check the workspace
 
 Python 3.11 or newer is required. The validator uses only the standard library and never creates missing asset paths.
@@ -42,10 +44,10 @@ export WANDB_DIR="$GIGA_WAM_RL_ARTIFACT_ROOT/runs/wandb"
 
 ## Initial research sequence
 
-1. Validate the 96-transition rollout-review set and the 16-dimensional action schema.
-2. Pin and run a GigaWorld-Policy-0.5 action-conditioned future forward pass.
-3. Determine whether LingBot/Wan latents are compatible; re-encode from raw observations only if required.
-4. Port only the necessary rollout, reward, PPO, and GRPO utilities from FastWAM-RL.
-5. Expand to the full RobotWin evaluation/failure data only after the small probe passes.
+1. Strict-load the pinned GigaWorld-Policy-0.5 transformer and Wan2.2 base, then run one synthetic forward pass to resolve the public 16D/32D interface mismatch.
+2. Choose and verify one physical action contract; do not equate the student's EEF 16D representation with the official model's 16 channels.
+3. Convert only 3–5 raw HDF5/rollout samples and validate camera order, timestamps, a 48-step action chunk, and five future frames.
+4. Add a future-only sampler for action-conditioned counterfactual rollout and test whether imagined-future rankings are calibrated.
+5. Port only the necessary rollout, reward, advantage, PPO, and GRPO utilities from FastWAM-RL after the counterfactual probe passes.
 
 The current bootstrap intentionally performs no model download, data conversion, training, rollout, GPU process termination, or shared-storage cleanup.

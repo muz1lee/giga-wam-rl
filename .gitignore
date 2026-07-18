@@ -7,6 +7,9 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 
+# Pinned upstream checkouts are recorded in configs/upstreams.toml, not vendored.
+/external/
+
 # Large or generated research artifacts must live on the dedicated NAS root.
 artifacts/
 cache/

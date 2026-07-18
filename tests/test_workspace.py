@@ -1,6 +1,7 @@
 import io
 import sys
 import tempfile
+import tomllib
 import unittest
 from pathlib import Path
 
@@ -121,6 +122,26 @@ class ProjectRegistryTests(unittest.TestCase):
         ]
         self.assertGreater(len(student_assets), 0)
         self.assertTrue(all(asset["read_only"] is True for asset in student_assets))
+
+    def test_gwp05_upstreams_are_pinned(self) -> None:
+        upstream_path = PROJECT_ROOT / "configs" / "upstreams.toml"
+        self.assertTrue(upstream_path.is_file())
+
+        with upstream_path.open("rb") as upstream_file:
+            upstream = tomllib.load(upstream_file)
+
+        self.assertEqual(
+            upstream["code"]["giga_world_policy_0_5"]["revision"],
+            "5d55073a6508de7354c83679d9028f4010ff6cb2",
+        )
+        self.assertEqual(
+            upstream["models"]["giga_world_policy_0_5_transformer"]["revision"],
+            "4b68e90c0833fec96df456426be344bab64e01a3",
+        )
+        self.assertEqual(
+            upstream["models"]["wan_2_2_ti2v_5b_diffusers"]["revision"],
+            "b8fff7315c768468a5333511427288870b2e9635",
+        )
 
 
 class RunCheckTests(unittest.TestCase):

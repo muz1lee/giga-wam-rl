@@ -49,6 +49,14 @@ read_only = true
 compatibility = "episode_schema_and_integrity_unverified"
 
 [[assets]]
+name = "place_bread_raw_hdf5"
+kind = "dataset"
+path = "/home/wjh/robotwin_clean50x50_official/workspace/RoboTwin/data/place_bread_basket/demo_clean_fastwam/data"
+owner = "student"
+read_only = true
+compatibility = "preferred_demo_conversion_source; multi_camera_rgb_and_joint_action_vector_14_observed"
+
+[[assets]]
 name = "lingbot_robotwin_checkpoint"
 kind = "model"
 path = "/home/wjh/lingbot-va/checkpoints/lingbot-va-posttrain-robotwin"

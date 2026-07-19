@@ -190,14 +190,13 @@ def run_conversion(
                 frame = {
                     "observation.state": states[frame_index],
                     "action": actions[frame_index],
+                    "task": dataset_config["canonical_instruction"],
                 }
                 for model_camera, source_key in camera_map.items():
                     frame[f"observation.images.{model_camera}"] = _decode_jpeg(
                         episode_file[source_key][frame_index]
                     )
-                dataset.add_frame(
-                    frame, task=dataset_config["canonical_instruction"]
-                )
+                dataset.add_frame(frame)
             dataset.save_episode()
         expected_vectors.append((states, actions))
         source_records.append(

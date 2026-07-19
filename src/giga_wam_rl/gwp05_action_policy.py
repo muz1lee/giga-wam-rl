@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 import importlib.util
 from pathlib import Path
 import time
@@ -19,16 +18,9 @@ from giga_wam_rl.gwp05_smoke import _add_upstream_import_paths
 from giga_wam_rl.robotwin_collection import (
     ACTION_HORIZON,
     MODEL_ACTION_DIM,
+    PolicyPrediction,
     PolicyActionNormalizer,
 )
-
-
-@dataclass(frozen=True)
-class PolicyPrediction:
-    normalized_action: np.ndarray
-    physical_action: np.ndarray
-    inference_time_s: float
-    seed: int
 
 
 class GWP05ActionPolicy:

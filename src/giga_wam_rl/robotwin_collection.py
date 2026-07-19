@@ -27,6 +27,14 @@ class RobotWinObservation:
 
 
 @dataclass(frozen=True)
+class PolicyPrediction:
+    normalized_action: np.ndarray
+    physical_action: np.ndarray
+    inference_time_s: float
+    seed: int
+
+
+@dataclass(frozen=True)
 class ReplanProposal:
     observation_index: int
     replan_index: int

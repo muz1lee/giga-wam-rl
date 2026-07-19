@@ -7,7 +7,6 @@ from typing import Any
 
 import numpy as np
 
-from giga_wam_rl.gwp05_action_policy import GWP05ActionPolicy
 from giga_wam_rl.robotwin_collection import (
     EpisodeBuffer,
     ReplanProposal,
@@ -100,7 +99,7 @@ def execute_fixed_cadence_target(
 def collect_episode(
     *,
     env: Any,
-    policy: GWP05ActionPolicy,
+    policy: Any,
     settings: RolloutSettings,
     env_seed: int,
     policy_seed: int,

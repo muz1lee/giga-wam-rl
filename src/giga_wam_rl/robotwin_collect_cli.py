@@ -5,10 +5,14 @@ import json
 from pathlib import Path
 import subprocess
 import time
-import tomllib
 from typing import Any, Sequence
 
-from giga_wam_rl.gwp05_action_policy import load_gwp05_action_policy
+try:
+    import tomllib
+except ModuleNotFoundError:  # Python 3.10 RoboTwin environment
+    import tomli as tomllib
+
+from giga_wam_rl.gwp05_policy_rpc import RemoteGWP05ActionPolicy
 from giga_wam_rl.robotwin_collection import write_episode
 from giga_wam_rl.robotwin_rollout import (
     RolloutSettings,
@@ -61,7 +65,7 @@ def run_collection(
     num_workers: int,
     episode_count: int | None,
     max_actions: int | None,
-    device_name: str,
+    policy_port: int | None,
 ) -> dict[str, Any]:
     registry = load_registry(registry_path)
     validate_registry(registry)
@@ -113,16 +117,10 @@ def run_collection(
         task_name=settings.task,
         writable_save_root=worker_dir / "robotwin_runtime",
     )
-    policy = load_gwp05_action_policy(
-        checkpoint=Path(policy_config["checkpoint"]).resolve(strict=True),
-        base_model=Path(policy_config["base_model"]).resolve(strict=True),
-        upstream_root=upstream_root,
-        norm_stats_path=Path(policy_config["norm_stats"]).resolve(strict=True),
-        prompt=settings.instruction,
-        device_name=device_name,
-        num_inference_steps=int(policy_config["num_inference_steps"]),
-        clip_normalized_actions=bool(policy_config["clip_normalized_actions"]),
-        compile_transformer=bool(policy_config["compile_transformer"]),
+    policy = RemoteGWP05ActionPolicy(
+        host=str(policy_config["rpc_host"]),
+        port=int(policy_port if policy_port is not None else policy_config["rpc_port"]),
+        timeout_s=float(policy_config["rpc_timeout_s"]),
     )
     started = time.perf_counter()
     episode_summaries = []
@@ -220,7 +218,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--num-workers", type=int, default=1)
     parser.add_argument("--episode-count", type=int)
     parser.add_argument("--max-actions", type=int)
-    parser.add_argument("--device", default="cuda:0")
+    parser.add_argument("--policy-port", type=int)
     arguments = parser.parse_args(argv)
     summary = run_collection(
         project_root=project_root,
@@ -231,7 +229,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         num_workers=arguments.num_workers,
         episode_count=arguments.episode_count,
         max_actions=arguments.max_actions,
-        device_name=arguments.device,
+        policy_port=arguments.policy_port,
     )
     print(json.dumps(summary, indent=2, sort_keys=True))
     return 0

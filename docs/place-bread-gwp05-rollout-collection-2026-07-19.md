@@ -89,6 +89,12 @@ c3ddfa8b97d5519efa828b075999bd0006778e5e
 
 ## One-episode smoke
 
+GWP-0.5 与 RoboTwin 使用两个已有、互不修改的 Python 环境：模型进程在项目
+`.venv` 中运行，simulator 进程在 `fastwam_robotwin` 环境中运行。它们只通过
+localhost 上的 length-prefixed、`allow_pickle=False` NPZ 消息通信；不开放远程端口。
+
+终端 1 启动模型服务，只允许处理这次 smoke 的一个 replan 请求：
+
 ```bash
 cd /home/knowin-wenqian/giga-wam-rl
 
@@ -98,13 +104,30 @@ export HF_HOME="$GIGA_WAM_RL_ARTIFACT_ROOT/cache/huggingface"
 export CUDA_VISIBLE_DEVICES=3
 
 PYTHONPATH="src:external/giga-world-policy:external/giga-world-policy/third_party/giga-train:external/giga-world-policy/third_party/giga-datasets" \
-  .venv/bin/python -m giga_wam_rl.robotwin_collect_cli \
-  --run-id smoke_seed0_two_actions_20260719 \
+  .venv/bin/python -m giga_wam_rl.gwp05_policy_server \
+  --port 39500 \
+  --device cuda:0 \
+  --max-requests 1
+```
+
+看到 `policy_server_ready` 后，在终端 2 启动 simulator client：
+
+```bash
+cd /home/knowin-wenqian/giga-wam-rl
+
+export GIGA_WAM_RL_ARTIFACT_ROOT=/mnt/nas/wenqian/giga-wam-rl
+export TMPDIR="$GIGA_WAM_RL_ARTIFACT_ROOT/tmp"
+export CUDA_VISIBLE_DEVICES=3
+
+PYTHONPATH=src \
+  /mnt/data/miniconda3/envs/fastwam_robotwin/bin/python \
+  -m giga_wam_rl.robotwin_collect_cli \
+  --run-id smoke_seed0_two_actions_20260719_rpc1 \
   --worker-id 0 \
   --num-workers 1 \
   --episode-count 1 \
   --max-actions 2 \
-  --device cuda:0
+  --policy-port 39500
 ```
 
 ## Smoke gate

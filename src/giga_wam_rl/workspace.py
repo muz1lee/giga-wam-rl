@@ -4,7 +4,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Sequence, TextIO
 
-import tomllib
+try:
+    import tomllib
+except ModuleNotFoundError:  # Python 3.10 RoboTwin environment
+    import tomli as tomllib
 
 
 class UnsafeWorkspacePath(ValueError):
@@ -102,9 +105,7 @@ def run_check(registry_path: Path, *, output: TextIO) -> int:
         print(f"workspace status=unsafe error={error}", file=output)
         return 2
 
-    print(
-        f"workspace status=safe artifact_root={resolved_artifact_root}", file=output
-    )
+    print(f"workspace status=safe artifact_root={resolved_artifact_root}", file=output)
     for status in inspect_assets(registry):
         print(
             f"asset name={status.name} exists={str(status.exists).lower()} "

@@ -13,6 +13,11 @@
 - model/data cadence：每 15 simulator steps 一个 14D target，即约 16.67 Hz；
 - initial paired seeds：与 50 条 clean scripted demonstrations 对应的 `0..49`。
 
+公开的 `Giga-World-Policy-0.5` checkpoint 是官方用于目标任务 post-training
+的 pretrained initialization，并不是 `place_bread_basket` 已微调 policy。正式失败
+采集必须使用 50 条 demonstration post-train 后的 actor；公开初始化权重只用于验证
+collector 和 action contract，不能把其任务分布外 rollout 当作 near-policy failure。
+
 采集时只运行 action inference。Imagined future 不在 simulator loop 中生成；后续从保存的当前 observation、实际 executed action sequence 与 prompt 离线生成。
 
 ## 执行语义
@@ -66,6 +71,8 @@ checked-in TOML 默认：
 - 1 episode；
 - 最多执行 2 个 action；
 - 不启用 `torch.compile`；
+- normalized action 不截断，保持与官方 inference 一致；gripper 仍受 simulator
+  actuator 的 `[0,1]` 物理边界约束；
 - 不保存 eval MP4；
 - 拒绝覆盖同名 run/worker/episode。
 
@@ -146,3 +153,31 @@ PYTHONPATH=src \
 7. 记录模型 inference、simulator、写盘 wall time后再估算 6 小时吞吐。
 
 通过后才运行固定 16-seed calibration；再根据 p50/p90 episode wall time决定 4 worker 长跑与 no-progress termination 参数。
+
+## Collector smoke result
+
+技术 smoke 已在公开初始化权重上完成；它只验证 collector，不代表 task policy quality：
+
+```text
+/mnt/nas/wenqian/giga-wam-rl/datasets/raw/place_bread_gwp05_clean_rollouts/
+  smoke_seed0_two_actions_20260719_rpc3/worker_00/episode_seed_00000000/
+```
+
+- code revision：`27f44676dba6a279088ddc75a3ba052f23ab65a2`；
+- GWP revision：`5d55073a6508de7354c83679d9028f4010ff6cb2`；
+- 1 次 replan、2 个实际 action、3 个 observation；
+- GWP 10-step action inference：`0.695 s`；
+- simulator steps：`[0,15,30]`；
+- `max(abs(observation_state[1:] - executed_action)) = 0`；
+- `max(abs(proposal[:2] - executed_action)) = 0`；
+- 三相机均可按 RGB 解码为 `240×320×3`，视角彼此不同；
+- 全 numeric arrays finite，`allow_pickle=False` strict load 与 SHA-256 均通过；
+- `success=false`、`termination_reason=max_actions`，符合两动作 smoke 设定。
+
+启动中发现并修复了两个环境问题：SSH locale 必须是 UTF-8；直接构造官方
+`WAPipeline` 时必须从 Wan `model_index.json` 保留 `expand_timesteps=true`。前两次
+失败发生在 episode 写入前，对应空 run 目录 `rpc1/rpc2` 被保留为诊断痕迹。
+
+下一门槛不是直接扩到 16 seeds，而是先完成 full-50 demo 转换、完整 norm stats、
+固定 prompt T5 和最小 demonstration post-training。只有 SFT actor 的闭环 smoke
+通过后，才采集论文所需的 near-policy failure trajectories。

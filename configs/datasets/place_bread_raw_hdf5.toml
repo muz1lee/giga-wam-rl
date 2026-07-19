@@ -1,0 +1,41 @@
+[dataset]
+asset_name = "place_bread_raw_hdf5"
+source_root = "/home/wjh/robotwin_clean50x50_official/workspace/RoboTwin/data/place_bread_basket/demo_clean_fastwam/data"
+episode_file_glob = "episode*.hdf5"
+episode_id_regex = "^episode([0-9]+)\\.hdf5$"
+expected_episode_count = 50
+success_only = true
+deduplicate_adjacent_frames = false
+canonical_instruction = "Pick up the bread and place it in the basket."
+source_simulation_hz = 250
+source_save_every_steps = 15
+nominal_source_observation_hz = 16.6666666667
+initial_target_fps = 16
+
+[alignment]
+state_key = "joint_action/vector"
+action_component_keys = [
+  "joint_action/left_arm",
+  "joint_action/left_gripper",
+  "joint_action/right_arm",
+  "joint_action/right_gripper",
+]
+physical_action_dimensions = 14
+model_action_dimensions = 16
+model_padding_dimensions = 2
+action_start_offset = 1
+action_horizon = 48
+frame_offsets = [0, 12, 24, 36, 48]
+
+[cameras]
+decoded_color_contract = "opencv_imdecode_output_is_rgb_for_this_source; do_not_apply_bgr_to_rgb"
+
+[cameras.map]
+cam_high = "observation/head_camera/rgb"
+cam_left_wrist = "observation/left_camera/rgb"
+cam_right_wrist = "observation/right_camera/rgb"
+
+[probe]
+episode_ids = [0, 25, 49]
+sample_start = 0
+output_manifest = "/mnt/nas/wenqian/giga-wam-rl/datasets/manifests/place_bread_gwp05_pilot_probe.json"

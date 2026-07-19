@@ -160,6 +160,28 @@ class ProjectRegistryTests(unittest.TestCase):
         self.assertTrue(contract["validation"]["joint_forward"])
         self.assertTrue(contract["validation"]["vae_roundtrip"])
 
+    def test_raw_hdf5_contract_uses_causal_action_alignment(self) -> None:
+        config_path = (
+            PROJECT_ROOT / "configs" / "datasets" / "place_bread_raw_hdf5.toml"
+        )
+        self.assertTrue(config_path.is_file())
+
+        with config_path.open("rb") as config_file:
+            config = tomllib.load(config_file)
+
+        self.assertEqual(config["alignment"]["physical_action_dimensions"], 14)
+        self.assertEqual(config["alignment"]["model_action_dimensions"], 16)
+        self.assertEqual(config["alignment"]["action_start_offset"], 1)
+        self.assertEqual(config["alignment"]["action_horizon"], 48)
+        self.assertEqual(
+            config["alignment"]["frame_offsets"], [0, 12, 24, 36, 48]
+        )
+        self.assertFalse(config["dataset"]["deduplicate_adjacent_frames"])
+        self.assertIn(
+            "do_not_apply_bgr_to_rgb",
+            config["cameras"]["decoded_color_contract"],
+        )
+
 
 class RunCheckTests(unittest.TestCase):
     def test_safe_registry_returns_success(self) -> None:

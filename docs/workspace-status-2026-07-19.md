@@ -12,7 +12,7 @@
 | 服务器代码 | `/home/knowin-wenqian/giga-wam-rl` | 已同步，Git 状态干净 |
 | 持久化产物 | `/mnt/nas/wenqian/giga-wam-rl` | 已创建 |
 
-NAS 下已创建以下空目录：
+NAS 下使用以下项目目录：
 
 ```text
 artifacts/
@@ -73,9 +73,9 @@ export WANDB_DIR="$GIGA_WAM_RL_ARTIFACT_ROOT/runs/wandb"
 
 ## 当前缺失、需要后续补齐
 
-- GigaWorld-Policy-0.5 transformer checkpoint 和 Wan2.2 base 权重；
 - 当前服务器上的 FastWAM-RL checkout；
-- 可确认与 Giga 0.5 完全匹配的 VAE/latent；
+- 学生 LingBot latent 与固定 Wan2.2 VAE 的兼容性证明；默认策略仍是从 raw RGB 重编码；
+- raw HDF5 14D action 的逐维语义、单位、坐标系和控制频率；
 - 针对 96 transitions 的 schema、action frame、camera order、chunk length 验证结果；
 - Git 远端。当前本地和服务器 checkout 都有完整 commit 历史，但尚未配置持久化远端。
 
@@ -88,7 +88,14 @@ export WANDB_DIR="$GIGA_WAM_RL_ARTIFACT_ROOT/runs/wandb"
 服务器： /home/knowin-wenqian/giga-wam-rl/external/giga-world-policy
 ```
 
-两个 checkout 均为 detached HEAD，Git 状态干净；`external/` 不进入我们的仓库。模型 revision 也已固定在 `configs/upstreams.toml`，但尚未下载任何权重。接口审计见 `docs/gwp05-interface-audit-2026-07-19.md`。
+两个 checkout 均为 detached HEAD，Git 状态干净；`external/` 不进入我们的仓库。模型 revision 固定在 `configs/upstreams.toml`，权重已下载到：
+
+```text
+/mnt/nas/wenqian/giga-wam-rl/models/Giga-World-Policy-0.5
+/mnt/nas/wenqian/giga-wam-rl/models/Wan2.2-TI2V-5B-Diffusers
+```
+
+独立 smoke 环境位于 `/home/knowin-wenqian/giga-wam-rl/.venv`。Transformer strict-load/joint forward 和 Wan VAE roundtrip 均已通过；验证结果见 `docs/gwp05-smoke-results-2026-07-19.md`，机器可读接口见 `configs/gwp05_contract.toml`。
 
 ## 学生目录未受影响的证据
 

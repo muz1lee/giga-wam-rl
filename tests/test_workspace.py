@@ -143,6 +143,23 @@ class ProjectRegistryTests(unittest.TestCase):
             "b8fff7315c768468a5333511427288870b2e9635",
         )
 
+    def test_gwp05_contract_matches_validated_checkpoint(self) -> None:
+        contract_path = PROJECT_ROOT / "configs" / "gwp05_contract.toml"
+        self.assertTrue(contract_path.is_file())
+
+        with contract_path.open("rb") as contract_file:
+            contract = tomllib.load(contract_file)
+
+        self.assertEqual(contract["action"]["physical_dimensions"], 14)
+        self.assertEqual(contract["action"]["model_dimensions"], 16)
+        self.assertEqual(contract["action"]["horizon"], 48)
+        self.assertEqual(contract["visual"]["frame_offsets"], [0, 12, 24, 36, 48])
+        self.assertEqual(contract["latent"]["full_shape"], [48, 2, 24, 20])
+        self.assertEqual(contract["latent"]["future_shape"], [48, 1, 24, 20])
+        self.assertTrue(contract["validation"]["strict_load"])
+        self.assertTrue(contract["validation"]["joint_forward"])
+        self.assertTrue(contract["validation"]["vae_roundtrip"])
+
 
 class RunCheckTests(unittest.TestCase):
     def test_safe_registry_returns_success(self) -> None:

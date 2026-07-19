@@ -6,9 +6,9 @@
 
 在写数据转换或 RL 代码之前，必须先固定并检查 GigaWorld-Policy-0.5 的真实实现。公开代码确认了我们的核心方向是可行的：模型的因果结构支持把 action chunk 作为条件预测 future，因此可以补一个 counterfactual future sampler，再用 imagined future 的 reward 更新 action policy。
 
-但当前还不能直接训练，原因不是 RL 算法，而是两个接口问题尚未闭合：
+当前还不能直接训练，原因不是 RL 算法。模型侧的 16D/32D 冲突已经通过真实 strict-load 和 GPU forward 解决，但 physical action 语义仍未闭合：
 
-1. 官方 0.5 finetune 配置将 action/state 补到 32 维，transformer 与公开 checkpoint 却声明 16 维；需要用固定权重做严格加载和一次最小 forward，确认真实接口。
+1. 官方 0.5 finetune/inference 的 32D 路径是遗留接口；固定 checkpoint 只接受 16D。我们的第一版 contract 是 14D physical action/state 补零到 16D。
 2. 学生数据的 16D action 是双臂 EEF 表示，而官方 Giga 示例实际使用前 14 维和特定 delta mask。两者只是维数接近，语义并不兼容，不能截断、直接相减或套用官方 normalization。
 
 因此，第一阶段应先完成“固定源码与权重 → checkpoint smoke test → 明确 action adapter → 转换少量样本 → future-only counterfactual rollout”，然后再接 RL。
@@ -20,8 +20,8 @@
 | 组件 | 上游 | 固定 revision | 当前状态 |
 |---|---|---|---|
 | GigaWorld-Policy-0.5 代码 | `open-gigaai/giga-world-policy` | `5d55073a6508de7354c83679d9028f4010ff6cb2` | 本地和服务器均已 clone，detached HEAD，未修改 |
-| GigaWorld-Policy-0.5 transformer | `open-gigaai/Giga-World-Policy-0.5` | `4b68e90c0833fec96df456426be344bab64e01a3` | revision 已固定，权重尚未下载 |
-| Wan2.2 TI2V 5B Diffusers base | `Wan-AI/Wan2.2-TI2V-5B-Diffusers` | `b8fff7315c768468a5333511427288870b2e9635` | revision 已固定，权重尚未下载 |
+| GigaWorld-Policy-0.5 transformer | `open-gigaai/Giga-World-Policy-0.5` | `4b68e90c0833fec96df456426be344bab64e01a3` | 已下载；manifest、strict-load、joint forward 通过 |
+| Wan2.2 TI2V 5B Diffusers base | `Wan-AI/Wan2.2-TI2V-5B-Diffusers` | `b8fff7315c768468a5333511427288870b2e9635` | 已下载；VAE encode/decode roundtrip 通过 |
 
 上游 checkout 放在我们的 `external/` 下并被 Git 忽略。我们不会修改它；所有 adapter、sampler 和实验配置都写在自己的 `src/`、`configs/` 与 `scripts/` 下。
 
@@ -68,7 +68,7 @@ in_action_channels=16
 out_action_channels=16
 ```
 
-公开 Hugging Face checkpoint 的 config 也是 16。由于 `strict_load=True`，这不是可以忽略的小差异。第一项 GPU 验证必须是：使用固定 checkpoint 构造模型、严格加载权重，并用 synthetic batch 跑一次 forward；在这之前不写大规模 converter。
+公开 Hugging Face checkpoint 的 config 也是 16。真实验证确认 checkpoint 关键 action 权重为 16D；strict-load 无 missing/unexpected/mismatched keys，16D joint forward 成功，32D 输入失败。因此 converter 和 inference adapter 必须把 14D physical state/action 补零到 16D，不能使用官方脚本遗留的 32D。
 
 学生现有 16D action 则是：
 
@@ -189,10 +189,10 @@ ReFL/DRaFT 可作为第二阶段 baseline：关掉 no-grad fast path，对有限
 
 ## 接下来的最小闭环
 
-1. 下载固定 revision 的 transformer 与 Wan2.2 base 到 NAS，不使用默认浮动的 `main`。
-2. 在我们自己的配置中指定 4 张服务器 GPU，并关闭 smoke test 的 `until_completion` 自动重启。
-3. 做 checkpoint strict-load 和 synthetic one-forward，首先判定 16/32D 冲突的真实可运行 contract。
-4. 在 14D joint action 与 16D EEF 两条接口中选一条；第一版优先验证可直接对齐官方样例的 raw HDF5 14D 路线。
+1. 已完成：下载固定 revision 的 transformer 与 Wan2.2 base 到 NAS。
+2. 已完成：建立独立 Python 3.11 smoke 环境，不使用训练 launcher 或 `until_completion`。
+3. 已完成：checkpoint strict-load、16D joint forward、32D negative test 与 VAE roundtrip。
+4. 当前：验证 raw HDF5 14D action 的逐维语义、单位和控制频率；不要与学生 EEF 16D 混用。
 5. 只转换 3–5 个 episode/sample，检查 camera order、时间戳、48-step chunk、5 个 future frames、state/action 单位和 normalization。
 6. 实现 future-only counterfactual sampler，并验证同一 observation 下不同 action 能产生可区分的 future。
 7. 先做 reward ranking 与 world-model calibration；确认 imagined ranking 对真实成功率有预测性后，再接 advantage-weighted flow matching。

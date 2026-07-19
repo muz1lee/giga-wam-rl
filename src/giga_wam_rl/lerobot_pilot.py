@@ -47,44 +47,63 @@ def _features(action_names: list[str]) -> dict[str, dict[str, Any]]:
     return features
 
 
-def _first_video_frame(path: Path) -> Any:
+def _video_frame(path: Path, frame_index: int) -> Any:
     import av
 
     with av.open(str(path)) as container:
-        frame = next(container.decode(video=0))
-        return frame.to_ndarray(format="rgb24")
+        for index, frame in enumerate(container.decode(video=0)):
+            if index == frame_index:
+                return frame.to_ndarray(format="rgb24")
+    raise ValueError(f"video {path} has no frame {frame_index}")
 
 
-def _find_episode_video(
-    output_root: Path, *, camera_key: str, output_episode_id: int
-) -> Path:
-    episode_token = f"episode_{output_episode_id:06d}"
+def _find_camera_video(output_root: Path, *, camera_key: str) -> Path:
     matches = [
         path
-        for path in output_root.rglob("*.mp4")
-        if camera_key in str(path) and episode_token in path.name
+        for path in (output_root / "videos").rglob("*.mp4")
+        if camera_key in str(path)
     ]
     if len(matches) != 1:
         raise ValueError(
-            f"expected one video for {camera_key} {episode_token}, found {len(matches)}"
+            f"expected one pilot video chunk for {camera_key}, found {len(matches)}"
         )
     return matches[0]
 
 
 def _validate_parquet(
-    parquet_path: Path,
+    parquet_paths: list[Path],
     *,
+    output_root: Path,
+    output_episode_id: int,
     expected_state: Any,
     expected_action: Any,
 ) -> dict[str, Any]:
     import numpy as np
+    import pyarrow as pa
     import pyarrow.parquet as pq
 
-    table = pq.read_table(
-        parquet_path, columns=["observation.state", "action"]
+    table = pa.concat_tables(
+        [
+            pq.read_table(
+                path,
+                columns=[
+                    "observation.state",
+                    "action",
+                    "episode_index",
+                    "frame_index",
+                ],
+            )
+            for path in parquet_paths
+        ]
     )
-    state = np.asarray(table["observation.state"].to_pylist(), dtype=np.float32)
-    action = np.asarray(table["action"].to_pylist(), dtype=np.float32)
+    episode_index = np.asarray(table["episode_index"].to_pylist())
+    frame_index = np.asarray(table["frame_index"].to_pylist())
+    selected = np.flatnonzero(episode_index == output_episode_id)
+    selected = selected[np.argsort(frame_index[selected])]
+    state_values = table["observation.state"].to_pylist()
+    action_values = table["action"].to_pylist()
+    state = np.asarray([state_values[index] for index in selected], dtype=np.float32)
+    action = np.asarray([action_values[index] for index in selected], dtype=np.float32)
     if state.shape != expected_state.shape or action.shape != expected_action.shape:
         raise ValueError(
             f"converted parquet shapes differ: state={state.shape}, action={action.shape}"
@@ -97,7 +116,9 @@ def _validate_parquet(
             f"action_error={action_error}"
         )
     return {
-        "parquet": str(parquet_path.relative_to(parquet_path.parents[2])),
+        "parquet_files": [
+            str(path.relative_to(output_root)) for path in parquet_paths
+        ],
         "state_shape": list(state.shape),
         "action_shape": list(action.shape),
         "state_max_abs_error": state_error,
@@ -207,19 +228,25 @@ def run_conversion(
                 "num_frames": int(states.shape[0]),
             }
         )
+    dataset.finalize()
 
-    parquet_files = sorted(output_root.rglob("*.parquet"))
-    video_files = sorted(output_root.rglob("*.mp4"))
-    if len(parquet_files) != len(pilot_ids):
-        raise ValueError(f"expected {len(pilot_ids)} parquet files")
-    if len(video_files) != len(pilot_ids) * len(camera_map):
-        raise ValueError(f"expected {len(pilot_ids) * len(camera_map)} videos")
+    parquet_files = sorted((output_root / "data").rglob("*.parquet"))
+    video_files = sorted((output_root / "videos").rglob("*.mp4"))
+    if not parquet_files:
+        raise ValueError("converted dataset has no data parquet")
+    if len(video_files) != len(camera_map):
+        raise ValueError(
+            f"expected one pilot video chunk for each of {len(camera_map)} cameras"
+        )
 
     validations = []
+    output_episode_start = 0
     for output_episode_id, source_episode_id in enumerate(pilot_ids):
         states, actions = expected_vectors[output_episode_id]
         vector_validation = _validate_parquet(
-            parquet_files[output_episode_id],
+            parquet_files,
+            output_root=output_root,
+            output_episode_id=output_episode_id,
             expected_state=states,
             expected_action=actions,
         )
@@ -227,12 +254,13 @@ def run_conversion(
         source_path = source_root / f"episode{source_episode_id}.hdf5"
         with h5py.File(source_path, "r") as episode_file:
             for model_camera, source_key in camera_map.items():
-                video_path = _find_episode_video(
+                video_path = _find_camera_video(
                     output_root,
                     camera_key=f"observation.images.{model_camera}",
-                    output_episode_id=output_episode_id,
                 )
-                converted_rgb = _first_video_frame(video_path).astype(np.float32)
+                converted_rgb = _video_frame(
+                    video_path, output_episode_start
+                ).astype(np.float32)
                 source_rgb = _decode_jpeg(episode_file[source_key][0]).astype(
                     np.float32
                 )
@@ -260,6 +288,7 @@ def run_conversion(
                 "cameras": camera_validation,
             }
         )
+        output_episode_start += int(states.shape[0])
 
     output_files = []
     for path in sorted(path for path in output_root.rglob("*") if path.is_file()):

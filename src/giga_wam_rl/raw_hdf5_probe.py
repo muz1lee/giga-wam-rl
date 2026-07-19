@@ -24,6 +24,12 @@ def candidate_window_count(num_frames: int, *, horizon: int) -> int:
     return max(num_frames - horizon, 0)
 
 
+def shifted_action_indices(num_frames: int) -> list[int]:
+    if num_frames <= 0:
+        raise ValueError("num_frames must be positive")
+    return [min(index + 1, num_frames - 1) for index in range(num_frames)]
+
+
 def sample_indices(
     start: int,
     *,

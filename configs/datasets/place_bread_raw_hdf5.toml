@@ -23,6 +23,22 @@ action_component_keys = [
 physical_action_dimensions = 14
 model_action_dimensions = 16
 model_padding_dimensions = 2
+action_names = [
+  "fl_joint1",
+  "fl_joint2",
+  "fl_joint3",
+  "fl_joint4",
+  "fl_joint5",
+  "fl_joint6",
+  "left_gripper",
+  "fr_joint1",
+  "fr_joint2",
+  "fr_joint3",
+  "fr_joint4",
+  "fr_joint5",
+  "fr_joint6",
+  "right_gripper",
+]
 action_start_offset = 1
 action_horizon = 48
 frame_offsets = [0, 12, 24, 36, 48]
@@ -39,3 +55,11 @@ cam_right_wrist = "observation/right_camera/rgb"
 episode_ids = [0, 25, 49]
 sample_start = 0
 output_manifest = "/mnt/nas/wenqian/giga-wam-rl/datasets/manifests/place_bread_gwp05_pilot_probe.json"
+
+[conversion]
+repo_id = "giga-wam-rl/place_bread_gwp05_pilot"
+robot_type = "agilex"
+use_videos = true
+video_backend = "pyav"
+output_root = "/mnt/nas/wenqian/giga-wam-rl/datasets/converted/place_bread_gwp05_pilot_lerobot_v3"
+output_manifest = "/mnt/nas/wenqian/giga-wam-rl/datasets/manifests/place_bread_gwp05_pilot_conversion.json"

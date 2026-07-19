@@ -9,6 +9,7 @@ sys.path.insert(0, str(PROJECT_ROOT / "src"))
 from giga_wam_rl.raw_hdf5_probe import (  # noqa: E402
     candidate_window_count,
     sample_indices,
+    shifted_action_indices,
 )
 
 
@@ -29,6 +30,11 @@ class RawHDF5ProbeTests(unittest.TestCase):
             candidate_window_count(160, horizon=0)
         with self.assertRaises(ValueError):
             sample_indices(0, horizon=48, frame_offsets=(0, 12, 24, 36, 47))
+
+    def test_lerobot_rows_store_the_next_drive_target(self) -> None:
+        self.assertEqual(shifted_action_indices(4), [1, 2, 3, 3])
+        with self.assertRaises(ValueError):
+            shifted_action_indices(0)
 
 
 if __name__ == "__main__":

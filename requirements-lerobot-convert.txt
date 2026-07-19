@@ -1,0 +1,7 @@
+av==15.0.0
+datasets==4.8.5
+diffusers==0.35.2
+lerobot==0.4.4
+pandas==2.2.3
+pyarrow==21.0.0
+tyro==0.9.13

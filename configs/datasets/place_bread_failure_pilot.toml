@@ -1,0 +1,46 @@
+[dataset]
+asset_name = "robotwin_eval_rollouts"
+
+[probe]
+action_horizon = 48
+output_manifest = "/mnt/nas/wenqian/giga-wam-rl/datasets/manifests/place_bread_failure_pilot_probe.json"
+
+[conversion]
+repo_id = "giga-wam-rl/place_bread_failure_sparse_pilot"
+robot_type = "agilex"
+fps = 16
+use_videos = true
+video_backend = "pyav"
+output_root = "/mnt/nas/wenqian/giga-wam-rl/datasets/converted/place_bread_failure_sparse_pilot_lerobot_v3"
+output_manifest = "/mnt/nas/wenqian/giga-wam-rl/datasets/manifests/place_bread_failure_sparse_pilot_conversion.json"
+t5_manifest = "/mnt/nas/wenqian/giga-wam-rl/datasets/manifests/place_bread_failure_sparse_pilot_t5.json"
+
+[[episodes]]
+sidecar_path = "/mnt/data/wjh/robotwin_eval/place_bread_basket_exp016_sft_lora_r8_last4_step1500_16_seed6422_20260717/step1500/worker_0/negative_rollout_samples/negative_rollout_sidecar.jsonl"
+episode_index = 3
+seed = 64230003
+
+[[episodes]]
+sidecar_path = "/mnt/data/wjh/robotwin_eval/place_bread_basket_exp016_sft_lora_r8_last4_step1500_16_seed6422_20260717/step1500/worker_1/negative_rollout_samples/negative_rollout_sidecar.jsonl"
+episode_index = 0
+seed = 64240000
+
+[[episodes]]
+sidecar_path = "/mnt/data/wjh/robotwin_eval/place_bread_basket_exp016_sft_lora_r8_last4_step1500_16_seed6422_20260717/step1500/worker_1/negative_rollout_samples/negative_rollout_sidecar.jsonl"
+episode_index = 1
+seed = 64240001
+
+[[episodes]]
+sidecar_path = "/mnt/data/wjh/robotwin_eval/place_bread_basket_exp016_sft_lora_r8_last4_step1500_16_seed6422_20260717/step1500/worker_1/negative_rollout_samples/negative_rollout_sidecar.jsonl"
+episode_index = 2
+seed = 64240002
+
+[[episodes]]
+sidecar_path = "/mnt/data/wjh/robotwin_eval/place_bread_basket_exp016_sft_lora_r8_last4_step1500_16_seed6422_20260717/step1500/worker_3/negative_rollout_samples/negative_rollout_sidecar.jsonl"
+episode_index = 0
+seed = 64260000
+
+[[episodes]]
+sidecar_path = "/mnt/data/wjh/robotwin_eval/place_bread_basket_exp016_sft_lora_r8_last4_step1500_16_seed6422_20260717/step1500/worker_3/negative_rollout_samples/negative_rollout_sidecar.jsonl"
+episode_index = 3
+seed = 64260003

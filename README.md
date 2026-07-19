@@ -19,6 +19,8 @@ The raw Place Bread contract and three-episode LeRobot v3 pilot are described in
 
 The first real action-conditioned future rollout and its controls are in the [counterfactual smoke report](docs/place-bread-counterfactual-smoke-2026-07-19.md). Its small provenance record is [`manifests/place_bread_gwp05_counterfactual_smoke.json`](manifests/place_bread_gwp05_counterfactual_smoke.json); generated frames and conditions stay on NAS.
 
+The next work line is the [failure-future post-training pilot](docs/place-bread-failure-future-pilot-2026-07-19.md). It recovers six clean archived failures without using LingBot actions/latents, converts them to the validated 14D causal contract, and adds a clean-action future-only trainer. These old failures are intentionally limited to pipeline/overfit work because their capture cadence differs from the success demonstrations.
+
 ## Check the workspace
 
 Python 3.11 or newer is required. The validator uses only the standard library and never creates missing asset paths.
@@ -93,7 +95,8 @@ The converter intentionally refuses to overwrite either configured output path. 
 2. Completed for the demo pilot: verify the 14D joint-target order and causal alignment; pad the model input from 14D to the validated 16D checkpoint contract. Exact 250 Hz issued setpoints are not present in this HDF5.
 3. Completed: convert episodes 0, 25, and 49 to LeRobot v3 and validate camera order/color, a 48-step action chunk, and five visual observations through the LeRobot loader.
 4. Completed structurally: add a future-only sampler and verify that changing only the clean action changes the imagined future while a zero perturbation produces identical output.
-5. Sampler-step sweep completed: 25/50 steps increase action sensitivity but do not improve demo fidelity. Next calibrate across windows, seeds, perturbation directions, and simulator outcomes.
-6. Port only the necessary rollout, reward, advantage, PPO, and GRPO utilities from FastWAM-RL after held-out counterfactual ranking passes.
+5. Sampler-step sweep completed: 25/50 steps increase action sensitivity but do not improve demo fidelity. Do not expand this demo-only sweep further.
+6. In progress: recover six archived failure trajectories, convert them to LeRobot v3, and overfit a clean-action future-only objective. The implementation excludes terminal padded windows and never treats LingBot internal actions as physical GWP actions.
+7. Before a formal success+failure run, recollect failure trajectories at the same low-level simulator cadence as the demonstrations. Port PPO/GRPO utilities only after the post-trained WAM predicts action-matched failure futures.
 
-Only the three-episode pilot has been converted. One real paired model rollout plus diagnostic controls has been generated in our NAS namespace. No full-dataset conversion, training, or student GPU process termination has been performed.
+Only the three-episode success pilot has been converted so far. The failure converter/trainer is implemented locally but its NAS conversion and training run must still be executed and verified on the server. No full-dataset conversion, training, or student GPU process termination has been performed.

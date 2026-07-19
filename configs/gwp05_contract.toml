@@ -16,10 +16,12 @@ camera_keys = [
   "observation.images.cam_right_wrist",
 ]
 frame_offsets = [0, 12, 24, 36, 48]
+future_observation_offsets = [12, 24, 36, 48]
 composite_layout = "t"
 width = 320
 height = 384
 model_condition_fps = 16
+normalized_pixel_range = [-1.0, 1.0]
 
 [latent]
 channels = 48
@@ -28,6 +30,7 @@ temporal_factor = 4
 full_shape = [48, 2, 24, 20]
 reference_shape = [48, 1, 24, 20]
 future_shape = [48, 1, 24, 20]
+future_observations_per_latent = 4
 normalization = "(raw_latent - latents_mean) / latents_std"
 
 [validation]

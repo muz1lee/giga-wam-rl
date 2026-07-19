@@ -8,8 +8,8 @@
 
 - checkpoint 的 model action contract 是 16D，不是 32D；
 - 第一版应采用 14D physical action/state，尾部补零到 16D；
-- 五帧 `384×320` RGB 经 Wan2.2 VAE 编码为两个 latent frames；
-- joint transformer 输出包含 reference 和 future 两个 latent frames，future 是第二帧；
+- 五个稀疏时刻的 `384×320` RGB 经 Wan2.2 VAE 编码为两个 latent frames；
+- joint transformer 输出包含 reference 和 future 两个 latent frames；第二个 latent 经过时间压缩，承载 `[t+12,t+24,t+36,t+48]` 四个 future observations；
 - 当前剩余 blocker 是 14D physical action 的逐维语义、单位和控制频率，而不是模型能否加载。
 
 机器可读 contract 见 `configs/gwp05_contract.toml`。
@@ -92,10 +92,14 @@ latents_mean/std:      48 values each
 ```text
 RGB input:       [1, 3, 5, 384, 320]
 raw latent:      [1, 48, 2, 24, 20]
+single-frame:    [1, 48, 1, 24, 20]
 reference:       [1, 48, 1, 24, 20]
 future:          [1, 48, 1, 24, 20]
 reconstruction:  [1, 3, 5, 384, 320]
+postprocessed:   [1, 5, 3, 384, 320]
 ```
+
+VAE 输入与 decode 输出范围为 `[-1,1]`；postprocess 后范围为 `[0,1]`。注意这里的五帧是 offsets `[0,12,24,36,48]`，不是连续视频帧。future sampler 只需要生成第二个 latent time position，不应错误地生成四个或五个 future latent positions。
 
 归一化及其逆变换为：
 

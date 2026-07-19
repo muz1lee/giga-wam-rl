@@ -52,6 +52,10 @@ def expected_latent_shape(
     )
 
 
+def expected_postprocessed_shape(num_frames: int) -> tuple[int, ...]:
+    return (1, num_frames, 3, 384, 320)
+
+
 def validate_vae_manifest(base_model: Path) -> dict[str, Any]:
     base_model = base_model.resolve(strict=True)
     config_path = base_model / "vae" / "config.json"
@@ -75,6 +79,7 @@ def validate_vae_manifest(base_model: Path) -> dict[str, Any]:
 def encode_decode_smoke(base_model: Path, *, device_name: str) -> dict[str, Any]:
     import torch
     from diffusers.models import AutoencoderKLWan
+    from diffusers.video_processor import VideoProcessor
 
     device = torch.device(device_name)
     if device.type != "cuda" or not torch.cuda.is_available():
@@ -92,14 +97,23 @@ def encode_decode_smoke(base_model: Path, *, device_name: str) -> dict[str, Any]
     vae.to(device)
 
     video = torch.zeros(1, 3, 5, 384, 320, dtype=torch.bfloat16, device=device)
+    if video.min().item() < -1.0 or video.max().item() > 1.0:
+        raise VAEContractError("VAE input must be normalized to [-1, 1]")
     with torch.inference_mode():
         raw_latents = vae.encode(video).latent_dist.mode()
+        single_frame_latents = vae.encode(video[:, :, :1]).latent_dist.mode()
 
     expected_shape = expected_latent_shape(5)
     if tuple(raw_latents.shape) != expected_shape:
         raise VAEContractError(
             f"five-frame latent must have shape {expected_shape}, "
             f"got {tuple(raw_latents.shape)}"
+        )
+    expected_single_frame_shape = expected_latent_shape(1)
+    if tuple(single_frame_latents.shape) != expected_single_frame_shape:
+        raise VAEContractError(
+            f"single-frame latent must have shape {expected_single_frame_shape}, "
+            f"got {tuple(single_frame_latents.shape)}"
         )
 
     mean = torch.tensor(
@@ -125,15 +139,30 @@ def encode_decode_smoke(base_model: Path, *, device_name: str) -> dict[str, Any]
         )
     if not torch.isfinite(reconstruction).all().item():
         raise VAEContractError("VAE reconstruction contains NaN or Inf")
+    if reconstruction.min().item() < -1.001 or reconstruction.max().item() > 1.001:
+        raise VAEContractError("VAE reconstruction must stay within [-1, 1]")
+
+    video_processor = VideoProcessor(vae_scale_factor=vae.config.scale_factor_spatial)
+    postprocessed = video_processor.postprocess_video(reconstruction, output_type="pt")
+    expected_post_shape = expected_postprocessed_shape(5)
+    if tuple(postprocessed.shape) != expected_post_shape:
+        raise VAEContractError(
+            f"postprocessed video must have shape {expected_post_shape}, "
+            f"got {tuple(postprocessed.shape)}"
+        )
+    if postprocessed.min().item() < 0.0 or postprocessed.max().item() > 1.0:
+        raise VAEContractError("postprocessed video must stay within [0, 1]")
 
     return {
         "device": str(device),
         "dtype": "bfloat16",
         "input_shape": list(video.shape),
         "latent_shape": list(raw_latents.shape),
+        "single_frame_latent_shape": list(single_frame_latents.shape),
         "reference_shape": list(raw_latents[:, :, :1].shape),
         "future_shape": list(raw_latents[:, :, 1:].shape),
         "reconstruction_shape": list(reconstruction.shape),
+        "postprocessed_shape": list(postprocessed.shape),
         "peak_gpu_memory_gib": round(
             torch.cuda.max_memory_reserved(device) / (1024**3), 3
         ),

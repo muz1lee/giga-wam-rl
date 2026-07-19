@@ -113,6 +113,8 @@ $$
 
 这属于补齐官方已有建模能力，不是重新训练一套独立 world model。
 
+经固定 Wan VAE 验证，五个稀疏观测 offsets `[0,12,24,36,48]` 被时间压缩为两个 latent positions：第一个是 current/reference，第二个共同承载四个 future observations。因此 future-only sampler 的生成变量是单个 `[48,1,24,20]` future latent，而不是四个 future latent frames。
+
 ## 失败轨迹如何进入训练
 
 失败轨迹的核心用途是教 world model：给定某个会失败的 action chunk，未来确实会进入失败状态。此时 action 是条件，不是要模仿的 target。

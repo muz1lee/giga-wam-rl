@@ -9,6 +9,7 @@ sys.path.insert(0, str(PROJECT_ROOT / "src"))
 from giga_wam_rl.gwp05_vae_smoke import (  # noqa: E402
     VAEContractError,
     expected_latent_shape,
+    expected_postprocessed_shape,
     validate_vae_config,
 )
 
@@ -44,6 +45,9 @@ class GWP05VAEContractTests(unittest.TestCase):
     def test_one_and_five_frames_match_transformer_contract(self) -> None:
         self.assertEqual(expected_latent_shape(1), (1, 48, 1, 24, 20))
         self.assertEqual(expected_latent_shape(5), (1, 48, 2, 24, 20))
+
+    def test_postprocessed_video_is_time_major(self) -> None:
+        self.assertEqual(expected_postprocessed_shape(5), (1, 5, 3, 384, 320))
 
 
 if __name__ == "__main__":

@@ -461,8 +461,16 @@ def run_counterfactual_smoke(
     raw_joint_latents = (
         joint_latents.float() * latent_std + latent_mean
     ).to(dtype=dtype)
+    decoded_samples = []
     with torch.inference_mode():
-        decoded = vae.decode(raw_joint_latents, return_dict=False)[0]
+        for sample_index in range(batch_size):
+            decoded_samples.append(
+                vae.decode(
+                    raw_joint_latents[sample_index : sample_index + 1],
+                    return_dict=False,
+                )[0]
+            )
+    decoded = torch.cat(decoded_samples, dim=0)
     generated = _decoded_video_to_uint8(decoded)
     elapsed = time.perf_counter() - started
 
@@ -546,6 +554,7 @@ def run_counterfactual_smoke(
             "num_inference_steps": num_inference_steps,
             "scheduler_timesteps": timesteps,
             "seed": seed,
+            "vae_decode_batch_size": 1,
         },
         "normalization": {
             "path": str(norm_stats_path),

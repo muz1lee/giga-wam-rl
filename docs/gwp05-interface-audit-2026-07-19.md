@@ -194,9 +194,9 @@ ReFL/DRaFT 可作为第二阶段 baseline：关掉 no-grad fast path，对有限
 1. 已完成：下载固定 revision 的 transformer 与 Wan2.2 base 到 NAS。
 2. 已完成：建立独立 Python 3.11 smoke 环境，不使用训练 launcher 或 `until_completion`。
 3. 已完成：checkpoint strict-load、16D joint forward、32D negative test 与 VAE roundtrip。
-4. 当前：验证 raw HDF5 14D action 的逐维语义、单位和控制频率；不要与学生 EEF 16D 混用。
-5. 只转换 3–5 个 episode/sample，检查 camera order、时间戳、48-step chunk、5 个 future frames、state/action 单位和 normalization。
-6. 实现 future-only counterfactual sampler，并验证同一 observation 下不同 action 能产生可区分的 future。
+4. 已完成 demo pilot contract：raw HDF5 的 14D joint-target 顺序、component 一致性和因果 shift 已确认；它不是学生 EEF 16D，也不包含完整 250 Hz issued setpoints。
+5. 已完成：episodes 0、25、49 已转换成 LeRobot v3；camera order/color、48-step action query 和 5-frame visual query 均通过。严格 timestamp 与 normalization 仍放在扩大数据前处理。
+6. 当前：实现 future-only counterfactual sampler，并验证同一 observation 下不同 action 能产生可区分的 future。
 7. 先做 reward ranking 与 world-model calibration；确认 imagined ranking 对真实成功率有预测性后，再接 advantage-weighted flow matching。
 
 在第 6 步之前，写 PPO/GRPO trainer 都属于过早。当前真正的最短路径是先证明“action-conditioned counterfactual future 能生成，而且排序可信”。

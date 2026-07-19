@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-07-19T14:55:39+08:00",
+  "converter_code_revision": "da48d9745fc4a7e38cbbeb22f502955c3fbc778a",
+  "source": {
+    "asset_name": "place_bread_raw_hdf5",
+    "path": "/home/wjh/robotwin_clean50x50_official/workspace/RoboTwin/data/place_bread_basket/demo_clean_fastwam/data",
+    "owner": "student",
+    "read_only": true,
+    "success_only": true,
+    "episode_count": 50,
+    "total_frames": 11920,
+    "total_candidate_48_step_windows": 9520
+  },
+  "raw_probe": {
+    "path": "/mnt/nas/wenqian/giga-wam-rl/datasets/manifests/place_bread_gwp05_pilot_probe.json",
+    "sha256": "52cbd0cdd80fbddf7e0ceb2d8e90486b2a275054f9ef556f9a111cbbd4ecb936",
+    "size_bytes": 20018
+  },
+  "conversion": {
+    "format": "LeRobot v3",
+    "lerobot_version": "0.4.4",
+    "fps": 16,
+    "source_episode_ids": [0, 25, 49],
+    "output_episode_lengths": [228, 164, 225],
+    "total_frames": 617,
+    "path": "/mnt/nas/wenqian/giga-wam-rl/datasets/converted/place_bread_gwp05_pilot_lerobot_v3",
+    "manifest_path": "/mnt/nas/wenqian/giga-wam-rl/datasets/manifests/place_bread_gwp05_pilot_conversion.json",
+    "manifest_sha256": "b0a1992dcbb6d264b507f16a552374665840a84b02a8ef768522b904766f716c",
+    "manifest_size_bytes": 7171,
+    "file_count": 8,
+    "total_file_bytes": 3787932
+  },
+  "contract": {
+    "state": "state[t] = raw_joint_target[t]",
+    "action": "action[t] = raw_joint_target[min(t + 1, T - 1)]",
+    "action_dimensions": 14,
+    "model_action_dimensions_after_padding": 16,
+    "action_horizon": 48,
+    "visual_frame_offsets": [0, 12, 24, 36, 48],
+    "camera_keys": [
+      "observation.images.cam_high",
+      "observation.images.cam_left_wrist",
+      "observation.images.cam_right_wrist"
+    ],
+    "decoded_color": "OpenCV imdecode output is treated directly as RGB for this source"
+  },
+  "validation": {
+    "state_max_abs_error": 0.0,
+    "action_max_abs_error": 0.0,
+    "last_action_repeats_final_target": true,
+    "source_rgb_mae_range": [0.908, 1.352],
+    "source_channel_reversed_mae_range": [5.389, 11.779],
+    "lerobot_query_state_shape": [14],
+    "lerobot_query_action_shape": [48, 14],
+    "lerobot_query_camera_shape": [5, 3, 240, 320],
+    "validated_output_episode_starts": [0, 228, 392]
+  }
+}

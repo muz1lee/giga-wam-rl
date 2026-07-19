@@ -1,6 +1,6 @@
 # Giga-WAM-RL Workspace Status
 
-盘点时间：2026-07-19 01:42:24 +08:00。
+首次盘点：2026-07-19 01:42:24 +08:00。数据 pilot 更新：2026-07-19 14:55:39 +08:00。
 
 这是一份时间点快照。GPU 进程、显存和磁盘容量会变化，启动训练前需要重新检查。
 
@@ -11,6 +11,8 @@
 | 本地 Git 仓库 | `01_wam_rl_research/giga-wam-rl` | `main`；精确版本用 `git rev-parse HEAD` 查询 |
 | 服务器代码 | `/home/knowin-wenqian/giga-wam-rl` | 已同步，Git 状态干净 |
 | 持久化产物 | `/mnt/nas/wenqian/giga-wam-rl` | 已创建 |
+| 模型 smoke 环境 | `/home/knowin-wenqian/giga-wam-rl/.venv` | Python 3.11；模型依赖已验证 |
+| LeRobot 转换环境 | `/home/knowin-wenqian/giga-wam-rl/.venv-convert` | LeRobot 0.4.4；与模型环境隔离 |
 
 NAS 下使用以下项目目录：
 
@@ -71,11 +73,23 @@ export WANDB_DIR="$GIGA_WAM_RL_ARTIFACT_ROOT/runs/wandb"
 
 服务器检查器确认上述 8 个路径当前均存在。完整登记见 `configs/assets.server.toml`。
 
+## Place Bread 数据 pilot
+
+raw HDF5 已完成只读 probe：50 个成功 episode、11,920 帧、9,520 个完整 48-step window。14D 顺序和四个 component 拼接已确认；正确因果对齐为 `state[t]=vector[t]`、`action[t]=vector[min(t+1,T-1)]`。
+
+episodes 0、25、49 已转换到：
+
+```text
+/mnt/nas/wenqian/giga-wam-rl/datasets/converted/place_bread_gwp05_pilot_lerobot_v3
+```
+
+LeRobot loader 已验证 `state (14,)`、`action (48,14)`、三相机各 `(5,3,240,320)`。详细结果见 `docs/place-bread-data-pilot-2026-07-19.md`。
+
 ## 当前缺失、需要后续补齐
 
 - 当前服务器上的 FastWAM-RL checkout；
 - 学生 LingBot latent 与固定 Wan2.2 VAE 的兼容性证明；默认策略仍是从 raw RGB 重编码；
-- raw HDF5 14D action 的逐维语义、单位、坐标系和控制频率；
+- raw HDF5 只有约 16.67 Hz 的 sampled drive targets；若需要严格的 250 Hz issued setpoints，仍需 `_traj_data/*.pkl` 或重新录制；
 - 针对 96 transitions 的 schema、action frame、camera order、chunk length 验证结果；
 - Git 远端。当前本地和服务器 checkout 都有完整 commit 历史，但尚未配置持久化远端。
 

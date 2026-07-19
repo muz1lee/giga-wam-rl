@@ -171,6 +171,7 @@ class ProjectRegistryTests(unittest.TestCase):
 
         self.assertEqual(config["alignment"]["physical_action_dimensions"], 14)
         self.assertEqual(config["alignment"]["model_action_dimensions"], 16)
+        self.assertEqual(len(config["alignment"]["action_names"]), 14)
         self.assertEqual(config["alignment"]["action_start_offset"], 1)
         self.assertEqual(config["alignment"]["action_horizon"], 48)
         self.assertEqual(
@@ -180,6 +181,11 @@ class ProjectRegistryTests(unittest.TestCase):
         self.assertIn(
             "do_not_apply_bgr_to_rgb",
             config["cameras"]["decoded_color_contract"],
+        )
+        self.assertTrue(
+            config["conversion"]["output_root"].startswith(
+                "/mnt/nas/wenqian/giga-wam-rl/datasets/converted/"
+            )
         )
 
 

@@ -137,4 +137,4 @@ PYTHONPATH=src .venv/bin/python -m giga_wam_rl.gwp05_vae_smoke \
 
 真实 Place Bread paired counterfactual 已在同一 pinned transformer/VAE 上跑通。零扰动得到完全相同的 future；`joint 0 += 0.5 rad` 得到 future latent mean absolute difference `0.04531` 和 decoded future pixel difference `2.837/255`。但 10-step demo rollout 相对真实 future 的 pixel MAE 为 `82.505/255`，而真实帧 VAE round-trip 仅 `1.765/255`。
 
-因此 checkpoint 的 action-conditioned future 路径存在，但生成质量和 failure ranking 尚未通过。完整 contract、controls、artifact 路径和下一步门槛见 `docs/place-bread-counterfactual-smoke-2026-07-19.md`。
+25/50-step sweep 没有改善 demo fidelity：MAE 分别为 `82.894/255` 和 `83.023/255`，同时 action-conditioned pixel difference 增长到 `3.507/255` 和 `3.861/255`。因此 checkpoint 的 action-conditioned future 路径存在，但生成质量和 failure ranking 尚未通过；当前问题也不能靠单纯增加 sampler steps 解决。完整 contract、controls、artifact 路径和下一步门槛见 `docs/place-bread-counterfactual-smoke-2026-07-19.md`。

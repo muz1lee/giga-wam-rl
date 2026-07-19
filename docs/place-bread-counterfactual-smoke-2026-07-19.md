@@ -6,7 +6,7 @@
 
 真实 Place Bread 初始观测、真实 demonstration action chunk 和 GigaWorld-Policy-0.5 已经跑通 action-conditioned future-only rollout。固定 reference、state、prompt 和初始 future noise，只把 joint 0 的 48-step target 整体增加 `0.5 rad`，模型生成的 future latent 会稳定改变；零扰动 control 则得到逐元素相同的 latent 和 decoded frames。
 
-这证明当前 checkpoint 和 sampler **确实存在 action → future 的计算路径**，不是静态视频生成器。但第一条 10-step rollout 对 demonstration 的真实 future 拟合很差，肉眼也看不出明确的“成功变失败”语义。当前结果只能称为 structural counterfactual smoke，不能作为模型已经会预测失败、也不能直接作为 RL reward 的证据。
+这证明当前 checkpoint 和 sampler **确实存在 action → future 的计算路径**，不是静态视频生成器。但 10/25/50-step rollout 对 demonstration 的真实 future 都拟合很差，肉眼也看不出明确的“成功变失败”语义。当前结果只能称为 structural counterfactual smoke，不能作为模型已经会预测失败、也不能直接作为 RL reward 的证据。
 
 ## 运行 contract
 
@@ -143,23 +143,34 @@ export PYTHONPATH=src
 
 runner 会拒绝覆盖已有 output directory，并要求我们的项目 checkout 和 pinned external checkout 都是 clean 状态。
 
+### 4. Sampler step sweep
+
+保持 episode/window、seed、prompt、demo action 和 `joint 0 += 0.5 rad` counterfactual 全部不变，只改变 visual Euler steps：
+
+| Steps | Demo vs GT MAE `/255` | Action-conditioned latent diff | Action-conditioned pixel diff `/255` | Wall time |
+|---:|---:|---:|---:|---:|
+| 10 | `82.505` | `0.04531` | `2.837` | `11.300 s` |
+| 25 | `82.894` | `0.05536` | `3.507` | `11.672 s` |
+| 50 | `83.023` | `0.06056` | `3.861` | `13.413 s` |
+
+更多 steps 增强了 action sensitivity，却没有改善 demo fidelity，误差反而略增。因此当前问题不是“10 steps 太少”；后续不再把 sampler-step 调参作为主线。
+
 ## 怎么解释
 
 正面结果是：action condition 没有被模型忽略。相同 noise 下，action 改变导致 latent 和图像改变；零扰动时差异严格为 0。我们设想的“固定当前观测，对不同 action chunk imagine future”在工程和模型接口层面成立。
 
 负面结果同样重要：当前生成的 future 虽然保留了三视图场景、面包和篮子，但 demo action 也没有重现真实机器人运动；`82.5/255` 远高于 VAE control 的 `1.76/255`。而 `+0.5 rad` 的影响肉眼很弱，尚不能解释成失败、碰撞或任务结果改变。
 
-这里还有三个不能混淆的变量：
+这里还有两个不能混淆的变量：
 
-1. 当前只跑了 10-step visual denoising，尚未比较 25/50 steps；
-2. norm stats 只来自 3 条成功 demo，perturbed action 对模型仍可能是 OOD；
-3. 公开 post-training trainer 没有显式提供 clean-action、visual-only AC-WM 配置，checkpoint 的这部分训练分布无法从公开代码完整复现。
+1. norm stats 只来自 3 条成功 demo，perturbed action 对模型仍可能是 OOD；
+2. 公开 post-training trainer 没有显式提供 clean-action、visual-only AC-WM 配置，checkpoint 的这部分训练分布无法从公开代码完整复现。
 
 所以当前判断不是“Giga 不行”，而是“值得继续做 calibration probe，但还不能接 RL”。
 
 ## 下一阶段的最小实验
 
-1. 先做 `10/25/50` step sweep，并在 3 个 episode 的若干完整窗口、3 个固定 seeds 上复测 demo fidelity 和 action sensitivity。若 25/50 steps 不明显改善，就停止在 sampler steps 上继续调参。
+1. 在 3 个 episode 的若干完整窗口、3 个固定 seeds 上复测 demo fidelity 和 action sensitivity，默认使用 25 steps，不再扩大 step sweep。
 2. 对少量有物理含义的 action 扰动做 `-offset / demo / +offset`，只看变化是否随方向和幅度稳定，不急着设计复杂 reward。
 3. 在 RoboTwin 中真实执行相同 perturbed action chunk，得到 ground-truth counterfactual future/success/failure。核心指标是 imagined ranking 是否和 simulator outcome 一致，而不是生成图是否“看着合理”。
 4. 若 public checkpoint 排序不校准，用 success + failure rollout 做 clean-action、future visual-only post-training；不需要改 transformer 架构。

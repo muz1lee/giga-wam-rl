@@ -93,7 +93,7 @@ The converter intentionally refuses to overwrite either configured output path. 
 2. Completed for the demo pilot: verify the 14D joint-target order and causal alignment; pad the model input from 14D to the validated 16D checkpoint contract. Exact 250 Hz issued setpoints are not present in this HDF5.
 3. Completed: convert episodes 0, 25, and 49 to LeRobot v3 and validate camera order/color, a 48-step action chunk, and five visual observations through the LeRobot loader.
 4. Completed structurally: add a future-only sampler and verify that changing only the clean action changes the imagined future while a zero perturbation produces identical output.
-5. Next: calibrate demo fidelity and counterfactual ranking across sampler steps, windows, seeds, and simulator-executed perturbations.
+5. Sampler-step sweep completed: 25/50 steps increase action sensitivity but do not improve demo fidelity. Next calibrate across windows, seeds, perturbation directions, and simulator outcomes.
 6. Port only the necessary rollout, reward, advantage, PPO, and GRPO utilities from FastWAM-RL after held-out counterfactual ranking passes.
 
 Only the three-episode pilot has been converted. One real paired model rollout plus diagnostic controls has been generated in our NAS namespace. No full-dataset conversion, training, or student GPU process termination has been performed.

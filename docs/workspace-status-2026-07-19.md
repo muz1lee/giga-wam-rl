@@ -1,6 +1,6 @@
 # Giga-WAM-RL Workspace Status
 
-首次盘点：2026-07-19 01:42:24 +08:00。数据 pilot 更新：2026-07-19 14:55:39 +08:00。
+首次盘点：2026-07-19 01:42:24 +08:00。数据 pilot 更新：2026-07-19 14:55:39 +08:00。counterfactual smoke 更新：2026-07-19 15:22 +08:00。
 
 这是一份时间点快照。GPU 进程、显存和磁盘容量会变化，启动训练前需要重新检查。
 
@@ -84,6 +84,17 @@ episodes 0、25、49 已转换到：
 ```
 
 LeRobot loader 已验证 `state (14,)`、`action (48,14)`、三相机各 `(5,3,240,320)`。详细结果见 `docs/place-bread-data-pilot-2026-07-19.md`。
+
+## Place Bread counterfactual smoke
+
+真实 episode 0 的 reference/state/demo action 已接入 GWP-0.5 future-only sampler。固定 ref/prompt/noise，`joint 0 += 0.5 rad` 产生 nonzero future latent/image difference；零扰动 control 的 paired output 完全相同。正式 artifact 位于：
+
+```text
+/mnt/nas/wenqian/giga-wam-rl/artifacts/counterfactual_smoke/
+  place_bread_ep0_t0_joint0_plus0p5_decode1_seed7_steps10/
+```
+
+10-step demo future 尚未匹配 ground truth，因此当前只证明 action-conditioning path，不证明 failure prediction。详细报告见 `docs/place-bread-counterfactual-smoke-2026-07-19.md`。
 
 ## 当前缺失、需要后续补齐
 

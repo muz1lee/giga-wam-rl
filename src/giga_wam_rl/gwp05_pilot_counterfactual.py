@@ -4,6 +4,7 @@ import hashlib
 import html
 import json
 import re
+import subprocess
 import time
 import tomllib
 from datetime import datetime, timezone
@@ -71,6 +72,24 @@ def _sha256_file(path: Path) -> str:
 
 def _sha256_array(array: np.ndarray) -> str:
     return hashlib.sha256(np.ascontiguousarray(array).tobytes()).hexdigest()
+
+
+def _git_revision(project_root: Path) -> str:
+    revision = subprocess.run(
+        ["git", "-C", str(project_root), "rev-parse", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    status = subprocess.run(
+        ["git", "-C", str(project_root), "status", "--porcelain=v1", "-uall"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout
+    if status:
+        raise ContractError("counterfactual runner requires a clean project checkout")
+    return revision
 
 
 def _load_toml(path: Path) -> dict[str, Any]:
@@ -363,6 +382,7 @@ def run_counterfactual_smoke(
     )
     if output_dir.exists():
         raise FileExistsError(f"refusing to overwrite counterfactual run: {output_dir}")
+    runner_revision = _git_revision(project_root)
     code_revision = validate_upstream_checkout(project_root, upstream_root)
     checkpoint_manifest = validate_checkpoint_manifest(checkpoint)
     vae_manifest = validate_vae_manifest(base_model)
@@ -515,6 +535,7 @@ def run_counterfactual_smoke(
         "schema_version": 1,
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
         "status": "paired_counterfactual_smoke_ok",
+        "runner_code_revision": runner_revision,
         "scope": (
             "structural action-conditioning smoke; not evidence of calibrated "
             "failure prediction"

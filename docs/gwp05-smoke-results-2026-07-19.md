@@ -10,7 +10,8 @@
 - 第一版应采用 14D physical action/state，尾部补零到 16D；
 - 五个稀疏时刻的 `384×320` RGB 经 Wan2.2 VAE 编码为两个 latent frames；
 - joint transformer 输出包含 reference 和 future 两个 latent frames；第二个 latent 经过时间压缩，承载 `[t+12,t+24,t+36,t+48]` 四个 future observations；
-- 当前剩余 blocker 是 14D physical action 的逐维语义、单位和控制频率，而不是模型能否加载。
+- raw Place Bread pilot 的 14D 顺序和 joint-target 因果对齐已经验证；严格的 issued-action 时间轴和所有物理单位仍未完整证明；
+- future-only sampler 已完成 synthetic 和真实 pilot smoke，checkpoint 对 clean action 有响应，但当前 imagined future 尚未校准到可作为 failure reward。
 
 机器可读 contract 见 `configs/gwp05_contract.toml`。
 
@@ -131,3 +132,9 @@ PYTHONPATH=src .venv/bin/python -m giga_wam_rl.gwp05_vae_smoke \
 ```
 
 这些 smoke tests 不加载数据、不训练、不使用 `torch.compile`，也不启动或停止学生服务。
+
+## 后续 real-data 更新
+
+真实 Place Bread paired counterfactual 已在同一 pinned transformer/VAE 上跑通。零扰动得到完全相同的 future；`joint 0 += 0.5 rad` 得到 future latent mean absolute difference `0.04531` 和 decoded future pixel difference `2.837/255`。但 10-step demo rollout 相对真实 future 的 pixel MAE 为 `82.505/255`，而真实帧 VAE round-trip 仅 `1.765/255`。
+
+因此 checkpoint 的 action-conditioned future 路径存在，但生成质量和 failure ranking 尚未通过。完整 contract、controls、artifact 路径和下一步门槛见 `docs/place-bread-counterfactual-smoke-2026-07-19.md`。

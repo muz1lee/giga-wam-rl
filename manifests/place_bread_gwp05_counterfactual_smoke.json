@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-07-19T15:22:15+08:00",
+  "runner_code_revision": "1543e92eb971fdcfd5fa1391453d2e3d2fd78d68",
+  "upstream_code_revision": "5d55073a6508de7354c83679d9028f4010ff6cb2",
+  "scope": "structural action-conditioning smoke; not evidence of calibrated failure prediction",
+  "normalization": {
+    "path": "/mnt/nas/wenqian/giga-wam-rl/datasets/manifests/place_bread_gwp05_pilot_norm.json",
+    "sha256": "26b41ce86cd8ab47b1da4be6660a6fd3bfda0e71bf0d7eb06ab986d4d310fa9c",
+    "size_bytes": 6094,
+    "num_episodes": 3,
+    "num_state_samples": 617,
+    "num_action_samples": 29616,
+    "model_dimensions": 16,
+    "physical_dimensions": 14,
+    "action_horizon": 48
+  },
+  "counterfactual_run": {
+    "path": "/mnt/nas/wenqian/giga-wam-rl/artifacts/counterfactual_smoke/place_bread_ep0_t0_joint0_plus0p5_decode1_seed7_steps10",
+    "manifest_sha256": "523e287b190a0d7e15218f95ebc5c6c9daecd49fe9ad8222eb3e4480ec2ab48f",
+    "contact_sheet_sha256": "0dbbaa949d6c8751e3252f0f5f3b888d948a46076b91ff39a89d420ef7b0a93f",
+    "conditions_sha256": "3aa47c306a6b8597bc72096b075eabceeb05c45ee08189c15c598afa366e6a31",
+    "file_count": 18,
+    "total_file_bytes": 3662501,
+    "episode_id": 0,
+    "start": 0,
+    "seed": 7,
+    "num_inference_steps": 10,
+    "action_dimension": 0,
+    "additive_raw_offset": 0.5,
+    "future_latent_mean_abs_difference": 0.04531325399875641,
+    "future_pixel_mean_abs_difference_0_255": 2.837236166000366,
+    "demo_future_vs_ground_truth_mean_abs_error_0_255": 82.50541687011719,
+    "paired_reference_max_abs_difference_0_255": 0.0,
+    "peak_gpu_memory_gib": 14.43,
+    "total_wall_seconds": 11.3
+  },
+  "zero_control": {
+    "path": "/mnt/nas/wenqian/giga-wam-rl/artifacts/counterfactual_smoke/place_bread_ep0_t0_zero_decode1_seed7_steps2",
+    "manifest_sha256": "614011136e20da667186e8952b7bc06b8a2cf6ca0e1240b1c4572c1231eaa60b",
+    "contact_sheet_sha256": "f44dddd151d206e174b54a95da500e99537d148cd1ba63639f6b9746dda3b7c5",
+    "conditions_sha256": "b52b27826b9020bb09f2728c83dc339e707be53fa09d38569ec8f09a0cb0de62",
+    "file_count": 18,
+    "total_file_bytes": 3895306,
+    "num_inference_steps": 2,
+    "future_latent_mean_abs_difference": 0.0,
+    "future_pixel_mean_abs_difference_0_255": 0.0,
+    "paired_reference_max_abs_difference_0_255": 0.0
+  },
+  "vae_ground_truth_control": {
+    "latent_shape": [1, 48, 2, 24, 20],
+    "overall_mean_abs_error_0_255": 1.764976143836975,
+    "per_offset_mean_abs_error_0_255": [
+      0.6197618246078491,
+      1.2997043132781982,
+      2.382397413253784,
+      2.598372459411621,
+      1.9246445894241333
+    ],
+    "peak_gpu_memory_gib": 3.131
+  }
+}

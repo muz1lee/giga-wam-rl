@@ -85,4 +85,4 @@ LeRobot metadata 为 v3.0、`robot_type=agilex`、`fps=16`；state/action 都保
 
 ## 下一步
 
-先不要立刻全量转换。下一步应实现 GWP-0.5 的 future-only sampler，并用这三条 pilot 构造小规模 action perturbation，验证模型能否对“保持 demo action”和“扰动 action”生成可区分、排序稳定的 future。只有这个 probe 通过，才值得扩大数据和接 reward-weighted flow matching / PPO / GRPO。
+future-only sampler 和第一条真实 action perturbation 已完成：模型会随 clean action 改变 imagined future，但 10-step demo prediction 尚未匹配真实 future。下一步仍不要立刻全量转换或接 RL；先按 `docs/place-bread-counterfactual-smoke-2026-07-19.md` 做 sampler-step、窗口、seed 和 simulator ground-truth calibration。

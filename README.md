@@ -17,6 +17,8 @@ Pinned upstream source/model revisions are recorded in [`configs/upstreams.toml`
 
 The raw Place Bread contract and three-episode LeRobot v3 pilot are described in the [data pilot report](docs/place-bread-data-pilot-2026-07-19.md). A small provenance record is tracked in [`manifests/place_bread_gwp05_pilot.json`](manifests/place_bread_gwp05_pilot.json); the generated parquet, videos, and detailed manifests stay on NAS.
 
+The first real action-conditioned future rollout and its controls are in the [counterfactual smoke report](docs/place-bread-counterfactual-smoke-2026-07-19.md). Its small provenance record is [`manifests/place_bread_gwp05_counterfactual_smoke.json`](manifests/place_bread_gwp05_counterfactual_smoke.json); generated frames and conditions stay on NAS.
+
 ## Check the workspace
 
 Python 3.11 or newer is required. The validator uses only the standard library and never creates missing asset paths.
@@ -90,7 +92,8 @@ The converter intentionally refuses to overwrite either configured output path. 
 1. Completed: strict-load the pinned transformer, run a joint forward, reject the stale 32D path, and validate Wan VAE encode/decode.
 2. Completed for the demo pilot: verify the 14D joint-target order and causal alignment; pad the model input from 14D to the validated 16D checkpoint contract. Exact 250 Hz issued setpoints are not present in this HDF5.
 3. Completed: convert episodes 0, 25, and 49 to LeRobot v3 and validate camera order/color, a 48-step action chunk, and five visual observations through the LeRobot loader.
-4. Add a future-only sampler for action-conditioned counterfactual rollout and test whether imagined-future rankings are calibrated.
-5. Port only the necessary rollout, reward, advantage, PPO, and GRPO utilities from FastWAM-RL after the counterfactual probe passes.
+4. Completed structurally: add a future-only sampler and verify that changing only the clean action changes the imagined future while a zero perturbation produces identical output.
+5. Next: calibrate demo fidelity and counterfactual ranking across sampler steps, windows, seeds, and simulator-executed perturbations.
+6. Port only the necessary rollout, reward, advantage, PPO, and GRPO utilities from FastWAM-RL after held-out counterfactual ranking passes.
 
-Only the three-episode pilot has been converted. No full-dataset conversion, training, model rollout, or student GPU process termination has been performed.
+Only the three-episode pilot has been converted. One real paired model rollout plus diagnostic controls has been generated in our NAS namespace. No full-dataset conversion, training, or student GPU process termination has been performed.

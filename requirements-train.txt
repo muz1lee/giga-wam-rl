@@ -2,16 +2,25 @@
 
 accelerate==1.13.0
 av==15.0.0
+beautifulsoup4==4.12.3
 datasets==4.8.5
+decord==0.6.0
 deepspeed==0.17.4
 diffusers==0.36.0
 einops==0.8.0
 lerobot==0.4.4
+lmdb==1.6.2
 pandas==2.2.3
+paramiko==3.5.0
 peft==0.17.1
 pyarrow==21.0.0
+lpips==0.1.4
+pytorch-fid==0.3.0
 PyYAML==6.0.3
 safetensors==0.5.2
+scikit-image==0.25.1
 tokenizers==0.21.4
+tensorboard==2.20.0
+terminaltables==3.1.10
 transformers==4.54.1
 tyro==0.9.13

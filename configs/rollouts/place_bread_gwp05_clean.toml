@@ -1,0 +1,26 @@
+[robotwin]
+root = "/home/knowin-wenqian/giga-wam-rl/external/robotwin-runtime"
+runtime_revision = "student_runtime_snapshot_20260719; official comparison c3ddfa8b97d5519efa828b075999bd0006778e5e"
+task = "place_bread_basket"
+task_config_path = "/home/knowin-wenqian/giga-wam-rl/configs/robotwin/demo_clean_gwp05.yml"
+instruction = "Pick up the bread and place it in the basket."
+step_limit = 700
+simulator_hz = 250
+simulator_steps_per_action = 15
+
+[policy]
+upstream_root = "/home/knowin-wenqian/giga-wam-rl/external/giga-world-policy"
+checkpoint = "/mnt/nas/wenqian/giga-wam-rl/models/Giga-World-Policy-0.5"
+base_model = "/mnt/nas/wenqian/giga-wam-rl/models/Wan2.2-TI2V-5B-Diffusers"
+norm_stats = "/mnt/nas/wenqian/giga-wam-rl/datasets/manifests/place_bread_gwp05_pilot_norm.json"
+num_inference_steps = 10
+replan_steps = 24
+clip_normalized_actions = true
+compile_transformer = false
+
+[collection]
+output_root = "/mnt/nas/wenqian/giga-wam-rl/datasets/raw/place_bread_gwp05_clean_rollouts"
+seed_start = 0
+policy_seed_start = 700000
+episode_count_per_worker = 1
+max_actions = 2

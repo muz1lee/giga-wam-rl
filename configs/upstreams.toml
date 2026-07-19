@@ -4,6 +4,12 @@ revision = "5d55073a6508de7354c83679d9028f4010ff6cb2"
 local_checkout = "external/giga-world-policy"
 server_checkout = "/home/knowin-wenqian/giga-wam-rl/external/giga-world-policy"
 
+[code.robotwin_2]
+repository = "https://github.com/RoboTwin-Platform/RoboTwin.git"
+revision = "c3ddfa8b97d5519efa828b075999bd0006778e5e"
+local_checkout = "external/robotwin"
+server_checkout = "/home/knowin-wenqian/giga-wam-rl/external/robotwin"
+
 [models.giga_world_policy_0_5_transformer]
 repository = "https://huggingface.co/open-gigaai/Giga-World-Policy-0.5"
 revision = "4b68e90c0833fec96df456426be344bab64e01a3"

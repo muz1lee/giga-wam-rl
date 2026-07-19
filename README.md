@@ -21,6 +21,8 @@ The first real action-conditioned future rollout and its controls are in the [co
 
 The next work line is the [failure-future post-training pilot](docs/place-bread-failure-future-pilot-2026-07-19.md). It recovers six clean archived failures without using LingBot actions/latents, converts them to the validated 14D causal contract, and adds a clean-action future-only trainer. These old failures are intentionally limited to pipeline/overfit work because their capture cadence differs from the success demonstrations.
 
+The formal failure-data line now starts from a [GWP-0.5 closed-loop RoboTwin collector](docs/place-bread-gwp05-rollout-collection-2026-07-19.md). It runs `place_bread_basket` with a 14D qpos actor, executes each 16.67 Hz model target over exactly 15 steps of the 250 Hz simulator, and stores current observations, raw 16D proposals, committed prefixes, executed 14D actions, and ground-truth future observations separately. Its checked-in defaults are deliberately limited to one episode and two actions.
+
 ## Check the workspace
 
 Python 3.11 or newer is required. The validator uses only the standard library and never creates missing asset paths.
@@ -96,7 +98,8 @@ The converter intentionally refuses to overwrite either configured output path. 
 3. Completed: convert episodes 0, 25, and 49 to LeRobot v3 and validate camera order/color, a 48-step action chunk, and five visual observations through the LeRobot loader.
 4. Completed structurally: add a future-only sampler and verify that changing only the clean action changes the imagined future while a zero perturbation produces identical output.
 5. Sampler-step sweep completed: 25/50 steps increase action sensitivity but do not improve demo fidelity. Do not expand this demo-only sweep further.
-6. In progress: recover six archived failure trajectories, convert them to LeRobot v3, and overfit a clean-action future-only objective. The implementation excludes terminal padded windows and never treats LingBot internal actions as physical GWP actions.
-7. Before a formal success+failure run, recollect failure trajectories at the same low-level simulator cadence as the demonstrations. Port PPO/GRPO utilities only after the post-trained WAM predicts action-matched failure futures.
+6. Implemented locally: recover six archived failure trajectories, convert them to LeRobot v3, and overfit a clean-action future-only objective. The implementation excludes terminal padded windows and never treats LingBot internal actions as physical GWP actions.
+7. In progress: collect GWP-0.5 closed-loop trajectories at the same 250 Hz / save-every-15 cadence as the demonstrations. The first gate is one episode with at most two executed actions; only after validating it do we run the fixed 16 seeds and four workers.
+8. Port PPO/GRPO utilities only after the post-trained WAM predicts action-matched failure futures.
 
 Only the three-episode success pilot has been converted so far. The failure converter/trainer is implemented locally but its NAS conversion and training run must still be executed and verified on the server. No full-dataset conversion, training, or student GPU process termination has been performed.

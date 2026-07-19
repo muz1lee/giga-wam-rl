@@ -1,7 +1,13 @@
+import json
+
 import numpy as np
+import pytest
 import torch
 
-from giga_wam_rl.gwp05_action_policy import GWP05ActionPolicy
+from giga_wam_rl.gwp05_action_policy import (
+    GWP05ActionPolicy,
+    _load_action_pipeline_options,
+)
 from giga_wam_rl.robotwin_collection import PolicyActionNormalizer
 
 
@@ -86,3 +92,24 @@ def test_action_policy_reseeds_each_replan_request() -> None:
 
     assert pipeline.calls[0]["generator"].initial_seed() == 4
     assert pipeline.calls[1]["generator"].initial_seed() == 9
+
+
+def test_action_pipeline_copies_expand_timesteps_from_base_model(tmp_path) -> None:
+    (tmp_path / "model_index.json").write_text(
+        json.dumps({"expand_timesteps": True, "boundary_ratio": None}),
+        encoding="utf-8",
+    )
+
+    assert _load_action_pipeline_options(tmp_path) == {
+        "expand_timesteps": True,
+        "boundary_ratio": None,
+    }
+
+
+def test_action_pipeline_rejects_non_action_only_base_model(tmp_path) -> None:
+    (tmp_path / "model_index.json").write_text(
+        json.dumps({"expand_timesteps": False}), encoding="utf-8"
+    )
+
+    with pytest.raises(ValueError, match="expand_timesteps=true"):
+        _load_action_pipeline_options(tmp_path)

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 from pathlib import Path
 import time
 from typing import Any
@@ -124,6 +125,19 @@ def _load_upstream_inference_module(upstream_root: Path) -> Any:
     return module
 
 
+def _load_action_pipeline_options(base_model: Path) -> dict[str, Any]:
+    model_index_path = base_model / "model_index.json"
+    payload = json.loads(model_index_path.read_text(encoding="utf-8"))
+    if payload.get("expand_timesteps") is not True:
+        raise ValueError(
+            "GWP action-only inference requires base model expand_timesteps=true"
+        )
+    return {
+        "expand_timesteps": True,
+        "boundary_ratio": payload.get("boundary_ratio"),
+    }
+
+
 def load_gwp05_action_policy(
     *,
     checkpoint: Path,
@@ -157,6 +171,7 @@ def load_gwp05_action_policy(
         vae=vae,
         scheduler=scheduler,
         transformer=transformer,
+        **_load_action_pipeline_options(base_model),
     ).to(device=device, dtype=dtype)
     if compile_transformer:
         compiled = upstream_inference.compile_policy_action_blocks(

@@ -118,6 +118,9 @@ cd /home/knowin-wenqian/giga-wam-rl
 export GIGA_WAM_RL_ARTIFACT_ROOT=/mnt/nas/wenqian/giga-wam-rl
 export TMPDIR="$GIGA_WAM_RL_ARTIFACT_ROOT/tmp"
 export CUDA_VISIBLE_DEVICES=3
+export LANG=C.UTF-8
+export LC_ALL=C.UTF-8
+export PYTHONUTF8=1
 
 PYTHONPATH=src \
   /mnt/data/miniconda3/envs/fastwam_robotwin/bin/python \
